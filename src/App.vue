@@ -1,7 +1,7 @@
 <template>
   <MainNavbar class="z-20" />
   <div class="page-container light-theme px-20 w-full min-h-screen">
-    <div class="top-controll z-10 mt-32 w-full flex flex-row justify-between items-start">
+    <div v-show="infoPageIsOpen === false" class="top-controll z-10 mt-32 w-full flex flex-row justify-between items-start">
       <div class="search-box light-theme relative h-16 w-[30rem] rounded-md overflow-hidden">
         <input type="text" name="search-input" id="search-input" class="light-theme w-full h-full top-0 left-0 right-0 bottom-0 outline-none pl-20 pr-4" placeholder="Search for a country...">
         <i class="bi bi-search absolute left-0 ml-[2.2rem] text-xl top-[50%]"></i>
@@ -16,14 +16,28 @@
         </div>
       </div>
     </div>
-    <div class="countries mt-12 w-full grid grid-cols-4 gap-16 mb-12">
-      <div v-for:="country in countries" class="country-card light-theme rounded-lg overflow-hidden">
-        <img :src="country.flags.svg" alt="mt" loading="lazy" class="w-full">
+    <div v-show="infoPageIsOpen === false" class="countries mt-12 w-full grid grid-cols-4 gap-16">
+      <div v-for:="country in countries" class="country-card light-theme rounded-lg overflow-hidden" @click="openCountryInfo(country)">
+        <img :src="country.flags.png" alt="mt" loading="lazy" class="w-full h-[190px]">
         <p class="country-name text-xl font-extrabold w-full px-6 mt-6">{{ country.name.common }}</p>
         <p class="country-population text-base font-semibold w-full px-6 mt-2">Population: <span class="font-light"> {{ country.population }}</span></p>
         <p class="country-region text-base font-semibold w-full px-6 mt-1">Region: <span class="font-light"> {{ country.region }}</span></p>
         <p class="country-capital text-base font-semibold w-full px-6 mt-1 mb-12">Capital: <span class="font-light"> {{ country.capital[0] }}</span></p>
       </div>
+    </div>
+    <div v-show="infoPageIsOpen === false" class="country-stack-pages mt-12 w-full grid-cols-3 gap-16 mb-12">
+      <div class="selectors col-span-1 flex justify-center items-center gap-2">
+        <button @click="changeCountryStackPage(-1)" class="next light-theme h-12 w-12 flex justify-center items-center rounded-lg shadow-md"><i class="bi bi-chevron-left"></i></button>
+        <input type="text" class="selector light-theme h-12 w-12 flex justify-center items-center rounded-lg shadow-md outline-none text-center" disabled @change="changeCountryStackPage" v-model="nowCountryStackPage" />
+        <button @click="changeCountryStackPage(1)" class="prev light-theme h-12 w-12 flex justify-center items-center rounded-lg shadow-md"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <div v-show="infoPageIsOpen === true" class="back-btn-container z-10 mt-32 w-full flex flex-row justify-start items-start">
+      <button class="back-btn light-theme relative h-12 w-44 rounded-md overflow-hidden shadow-md flex justify-center items-center gap-3" style="background: var(--element-color);">
+        <i class="bi bi-arrow-left text-2xl"></i>
+        <p class="light-theme text-xl font-semibold">Back</p>
+      </button>
     </div>
   </div>
 </template>
@@ -38,6 +52,9 @@ export default {
   },
   data() {
     return {
+      infoPageIsOpen: true,
+      countryStackSize: 32,
+      nowCountryStackPage: 1,
       filterBoxIsOpen: 0,
       regions: [
         {
@@ -61,9 +78,9 @@ export default {
           selected: false
         },
       ],
-      countries: [
-
-      ],
+      allCountries: [],
+      countries: [],
+      selectedCountry: [],
     }
   },
   methods: {
@@ -86,9 +103,51 @@ export default {
     },
     getCountries()
     {
-      this.countries = [
-        
-      ];
+
+      fetch('https://restcountries.com/v3.1/all').then((res) => res.json()).then((data) => {
+        localStorage['countries'] = JSON.stringify(data);
+        this.allCountries = data;
+        this.loadCountries();
+      });
+      
+    },
+    loadCountries()
+    {
+      let allCountries = this.allCountries;
+      this.allCountries = [];
+      let countries = [];
+      let st = 0;
+      while(st < allCountries.length)
+      {
+        countries = [];
+        for(let i = st;i < Math.min(st + this.countryStackSize, allCountries.length);i++)
+        {
+          countries.push(allCountries[i]);
+        }
+        this.allCountries.push(countries);
+        st = st + this.countryStackSize;
+      }
+      this.countries = this.allCountries[0];
+    },
+    changeCountryStackPage(change = 0)
+    {
+
+      this.nowCountryStackPage = this.nowCountryStackPage + change;
+      
+      if(this.nowCountryStackPage < 1)
+      {
+        this.nowCountryStackPage = 1;
+      }
+      if(this.nowCountryStackPage >= this.allCountries.length)
+      {
+        this.nowCountryStackPage = this.allCountries.length;
+      }
+      this.countries = this.allCountries[this.nowCountryStackPage - 1];
+    },
+    openCountryInfo(country = this.countries[0])
+    {
+      this.selectedCountry = country;
+      this.infoPageIsOpen = true;
     }
   },
   mounted() {
@@ -96,6 +155,7 @@ export default {
     this.getCountries()
   },
 }
+
 </script>
 
 <style scoped>
@@ -129,6 +189,10 @@ export default {
 .country-card {
   background: var(--element-color);
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.country-stack-pages > .selectors > button {
+  background: var(--element-color);
 }
 
 </style>
