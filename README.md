@@ -25,5 +25,5 @@ npm run build
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Demo Version
+there is demo version in [This Link](https://chat.dragotech.org/).
