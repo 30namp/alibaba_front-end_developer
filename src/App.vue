@@ -18,7 +18,7 @@
       </div>
     </div>
     <div v-show="infoPageIsOpen === false" class="countries mt-12 w-full grid grid-cols-1 sm:grid-cols-4 gap-16">
-      <div v-for:="country in countries" class="country-card mx-8 cursor-pointer light-theme rounded-lg overflow-hidden" @click="openCountryInfo(country)">
+      <div v-for:="country in countries" class="country-card mx-8 sm:mx-0 cursor-pointer light-theme rounded-lg overflow-hidden" @click="openCountryInfo(country)">
         <img :src="country.flags.png" alt="mt" loading="lazy" class="w-full h-[190px]">
         <p class="country-name text-xl font-semibold sm:font-extrabold w-full px-6 mt-6">{{ country.name.common }}</p>
         <p class="country-population text-base font-semibold sm:font-extrabold w-full px-6 mt-2">Population: <span class="font-light sm:font-semibold"> {{ country.population }}</span></p>
@@ -75,7 +75,7 @@
 
           <div class="light-theme col-span-2 flex flex-row justify-start items-start gap-2 flex-wrap mb-8 sm:mb-0">
             <p class="light-theme text-left text-base font-extrabold h-8 flex justify-start sm:justify-center items-center w-full sm:w-auto">Border Countries:</p> 
-            <span v-for:="borderCountry in selectedCountry.borders" class="font-semibold px-8 h-8 shadow-md flex justify-center items-center rounded-sm" style="background: var(--element-color);">
+            <span v-for:="borderCountry in selectedCountry.borders" @click="selectCountryByShortName(borderCountry)" class="font-semibold cursor-pointer px-8 h-8 shadow-md flex justify-center items-center rounded-sm" style="background: var(--element-color);">
               {{ borderCountry }}
             </span>
           </div>
@@ -232,6 +232,7 @@ export default {
         {
           this.allCountries[i].population = this.makeBetterNumber(this.allCountries[i].population);
         }
+        this.allCountries.sort();
         this.savedAllCountries = this.allCountries;
         this.loadCountries();
       });
@@ -304,6 +305,11 @@ export default {
     },
     makeBetterLanguageObject(languagesObject)
     {
+      if(typeof(languagesObject) === 'string')
+      {
+        return languagesObject;
+      }
+
       let languages = [];
       let objKeys = Object.keys(languagesObject);
       for(let i = 0;i < objKeys.length;i++)
@@ -315,15 +321,29 @@ export default {
     },
     makeBetterCurrenciesObject(currenciesObject)
     {
+      if(typeof(currenciesObject) === 'string')
+      {
+        return currenciesObject;
+      }
+
       let currencies = [];
       let keys = Object.keys(currenciesObject);
-      // console.log()
       for(let i = 0;i < keys.length;i++)
       {
         currencies.push(currenciesObject[keys[i]].name);
       }
 
       return currencies.join(", ");
+    },
+    selectCountryByShortName(shortName)
+    {
+      for(let i = 0;i < this.savedAllCountries.length;i++)
+      {
+        if(this.savedAllCountries[i].fifa === shortName)
+        {
+          this.openCountryInfo(this.savedAllCountries[i]);
+        }
+      }
     },
     closeInfoPage()
     {
