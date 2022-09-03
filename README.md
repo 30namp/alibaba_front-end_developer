@@ -20,11 +20,6 @@ npm run serve
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
 ### Demo Version
 there is demo version in [This Link](https://chat.dragotech.org/).
 
