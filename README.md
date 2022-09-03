@@ -30,4 +30,4 @@ there is demo version in [This Link](https://chat.dragotech.org/).
 
 #### The link is temporarily unavailable
 #### I would be grateful if you can test the files on your device so that the host can be reactivated
-#### Thankful
+#### Thankful 🌹🌹🌹
