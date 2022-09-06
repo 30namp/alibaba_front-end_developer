@@ -41,12 +41,31 @@ export default {
                 this.theme = 'light';
             }
 
+            window.localStorage['theme'] = this.theme;
+
             themedElements.forEach((elem) => {
-                elem.style.transition = '300ms';
-                elem.classList.toggle('light-theme');
-                elem.classList.toggle('dark-theme');
+                this.elementSwitchTheme(elem);
             });
+        },
+        elementSwitchTheme(elem) {
+            elem.style.transition = '300ms';
+            elem.classList.toggle('light-theme');
+            elem.classList.toggle('dark-theme');
         }
+    },
+    mounted() {
+        document.querySelector('body').addEventListener('onchange', () => {
+            let selector = '';
+            if(this.theme === 'dark')
+                selector = '.light';
+            else
+                selector = '.dark';
+            selector += '-theme';
+            let elems = document.querySelectorAll(selector);
+            elems.forEach((elem) => {
+                this.elementSwitchTheme(elem);
+            });
+        });
     }
 }
 
